@@ -416,15 +416,8 @@ const renderGoals = () => {
         <button class="outline" data-action="minus" data-id="${goal.id}">-1</button>
         <button class="primary" data-action="plus" data-id="${goal.id}">+1</button>
         <button class="ghost" data-action="reset" data-id="${goal.id}">Reset</button>
-        <button class="icon-btn danger show-label" data-action="delete" data-id="${goal.id}" aria-label="Delete goal">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 6h18" />
-            <path d="M8 6V4h8v2" />
-            <path d="M19 6l-1 14H6L5 6" />
-            <path d="M10 11v6" />
-            <path d="M14 11v6" />
-          </svg>
-          <span>Delete</span>
+        <button class="danger-btn" data-action="delete" data-id="${goal.id}">
+          Delete
         </button>
       </div>
     `;

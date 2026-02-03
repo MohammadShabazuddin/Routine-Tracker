@@ -1,4 +1,4 @@
-const CACHE_NAME = "routineflow-v6";
+const CACHE_NAME = "routineflow-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
