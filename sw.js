@@ -1,0 +1,176 @@
+const CACHE_NAME = "routineflow-v1";
+const APP_SHELL = [
+  "./",
+  "./index.html",
+  "./styles.css",
+  "./app.js",
+  "./manifest.webmanifest",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
+  "./icons/icon-192-maskable.png",
+  "./icons/icon-512-maskable.png",
+];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      )
+    )
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      if (cached) {
+        const fetchPromise = fetch(event.request)
+          .then((response) => {
+            if (response && response.status === 200) {
+              caches.open(CACHE_NAME).then((cache) =>
+                cache.put(event.request, response.clone())
+              );
+            }
+            return response;
+          })
+          .catch(() => cached);
+        return cached || fetchPromise;
+      }
+
+      return fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            caches.open(CACHE_NAME).then((cache) =>
+              cache.put(event.request, response.clone())
+            );
+          }
+          return response;
+        })
+        .catch(() => caches.match("./index.html"));
+    })
+  );
+});
+
+const DB_NAME = "routineflow-db";
+const DB_STORE = "schedule";
+
+const openDb = () =>
+  new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(DB_STORE)) {
+        db.createObjectStore(DB_STORE);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+
+const readSchedule = async () => {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, "readonly");
+    const request = tx.objectStore(DB_STORE).get("data");
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+const writeSchedule = async (data) => {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, "readwrite");
+    tx.objectStore(DB_STORE).put(data, "data");
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+};
+
+const shouldNotifyTask = (task, now, lastNotified) => {
+  if (!task.alarm) return false;
+  const [hours, minutes] = task.time.split(":").map(Number);
+  const scheduled = new Date(now);
+  scheduled.setHours(hours, minutes, 0, 0);
+
+  const day = now.toLocaleDateString("en-US", { weekday: "short" });
+  if (task.repeat === "weekdays" && (day === "Sat" || day === "Sun")) return false;
+  if (task.repeat === "weekends" && day !== "Sat" && day !== "Sun") return false;
+  if (task.repeat === "custom" && task.days && !task.days.includes(day)) return false;
+
+  const windowMs = 10 * 60 * 1000;
+  const isDue = Math.abs(now - scheduled) <= windowMs;
+  if (!isDue) return false;
+  return lastNotified !== now.toDateString();
+};
+
+const shouldNotifyGoal = (goal, now, lastNotified) => {
+  if (goal.progress >= goal.target) return false;
+  const intervalMs = goal.interval * 60 * 1000;
+  if (!lastNotified) return true;
+  return now.getTime() - lastNotified >= intervalMs;
+};
+
+const handleReminderCheck = async () => {
+  const schedule = await readSchedule();
+  if (!schedule || !schedule.settings || !schedule.settings.notifications) return;
+
+  const now = new Date();
+  const lastNotified = schedule.lastNotified || { tasks: {}, goals: {} };
+  let updated = false;
+
+  for (const task of schedule.tasks || []) {
+    const last = lastNotified.tasks[task.id];
+    if (shouldNotifyTask(task, now, last)) {
+      await self.registration.showNotification(task.title, {
+        body: task.notes || `Reminder scheduled for ${task.time}`,
+        icon: "icons/icon-192.png",
+        badge: "icons/icon-192.png",
+      });
+      lastNotified.tasks[task.id] = now.toDateString();
+      updated = true;
+    }
+  }
+
+  for (const goal of schedule.goals || []) {
+    const last = lastNotified.goals[goal.id];
+    if (shouldNotifyGoal(goal, now, last)) {
+      await self.registration.showNotification(goal.title, {
+        body: `Add ${goal.unit} to reach ${goal.target} today.`,
+        icon: "icons/icon-192.png",
+        badge: "icons/icon-192.png",
+      });
+      lastNotified.goals[goal.id] = now.getTime();
+      updated = true;
+    }
+  }
+
+  if (updated) {
+    await writeSchedule({ ...schedule, lastNotified });
+  }
+};
+
+self.addEventListener("periodicsync", (event) => {
+  if (event.tag === "routineflow-reminders") {
+    event.waitUntil(handleReminderCheck());
+  }
+});
+
+self.addEventListener("sync", (event) => {
+  if (event.tag === "routineflow-reminders") {
+    event.waitUntil(handleReminderCheck());
+  }
+});

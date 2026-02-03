@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RoutineFlow</title>
+    <meta
+      name="description"
+      content="Daily routine tracking with friendly reminders and progress goals."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="theme-color" content="#1f3a2b" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="RoutineFlow" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo">RF</div>
+        <div>
+          <p class="eyebrow">Daily routine</p>
+          <h1>RoutineFlow</h1>
+        </div>
+      </div>
+      <button class="ghost" id="openSettings">Settings</button>
+    </header>
+
+    <main class="app-shell">
+      <section class="hero">
+        <div>
+          <h2>Make every routine feel effortless.</h2>
+          <p>
+            Friendly reminders, smart repeats, and visual progress bars for goals like
+            daily water intake.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button class="primary" id="addTaskBtn">Add task</button>
+          <button class="outline" id="addGoalBtn">Add progress goal</button>
+          <button class="ghost hidden" id="installBtn">Install app</button>
+        </div>
+      </section>
+
+      <section class="grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Today</h3>
+            <div class="pill" id="todayCount">0 tasks</div>
+          </div>
+          <div class="task-list" id="taskList"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Goals</h3>
+            <div class="pill" id="goalCount">0 goals</div>
+          </div>
+          <div class="goal-list" id="goalList"></div>
+        </div>
+      </section>
+    </main>
+
+    <section class="sheet" id="taskSheet" aria-hidden="true">
+      <div class="sheet-card">
+        <div class="sheet-header">
+          <h3>New routine</h3>
+          <button class="ghost" data-close="taskSheet">Close</button>
+        </div>
+        <form id="taskForm">
+          <label>
+            Task name
+            <input type="text" name="title" placeholder="Morning walk" required />
+          </label>
+          <label>
+            Time
+            <input type="time" name="time" required />
+          </label>
+          <label>
+            Repeat
+            <select name="repeat">
+              <option value="daily">Daily</option>
+              <option value="weekdays">Weekdays</option>
+              <option value="weekends">Weekends</option>
+              <option value="custom">Custom days</option>
+            </select>
+          </label>
+          <div class="chip-row" id="repeatDays">
+            <button type="button" class="chip" data-day="Mon">Mon</button>
+            <button type="button" class="chip" data-day="Tue">Tue</button>
+            <button type="button" class="chip" data-day="Wed">Wed</button>
+            <button type="button" class="chip" data-day="Thu">Thu</button>
+            <button type="button" class="chip" data-day="Fri">Fri</button>
+            <button type="button" class="chip" data-day="Sat">Sat</button>
+            <button type="button" class="chip" data-day="Sun">Sun</button>
+          </div>
+          <div class="toggle-row">
+            <label class="toggle">
+              <input type="checkbox" name="alarm" checked />
+              <span class="slider"></span>
+            </label>
+            <div>
+              <p class="toggle-title">Alarm</p>
+              <p class="toggle-sub">Show reminder notifications when open.</p>
+            </div>
+          </div>
+          <label>
+            Notes
+            <textarea name="notes" rows="3" placeholder="Short motivational note"></textarea>
+          </label>
+          <button class="primary" type="submit">Save routine</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="sheet" id="goalSheet" aria-hidden="true">
+      <div class="sheet-card">
+        <div class="sheet-header">
+          <h3>Progress goal</h3>
+          <button class="ghost" data-close="goalSheet">Close</button>
+        </div>
+        <form id="goalForm">
+          <label>
+            Goal title
+            <input type="text" name="title" placeholder="Drink water" required />
+          </label>
+          <label>
+            Unit label
+            <input type="text" name="unit" placeholder="glasses" required />
+          </label>
+          <label>
+            Daily target
+            <input type="number" name="target" min="1" value="8" required />
+          </label>
+          <label>
+            Reminder interval (minutes)
+            <input type="number" name="interval" min="15" value="60" required />
+          </label>
+          <button class="primary" type="submit">Save goal</button>
+        </form>
+      </div>
+    </section>
+
+    <section class="sheet" id="settingsSheet" aria-hidden="true">
+      <div class="sheet-card">
+        <div class="sheet-header">
+          <h3>Settings</h3>
+          <button class="ghost" data-close="settingsSheet">Close</button>
+        </div>
+        <div class="settings">
+          <div class="toggle-row">
+            <label class="toggle">
+              <input type="checkbox" id="notificationsToggle" />
+              <span class="slider"></span>
+            </label>
+            <div>
+              <p class="toggle-title">Enable reminders</p>
+              <p class="toggle-sub">Best effort background notifications on Android.</p>
+            </div>
+          </div>
+          <button class="outline" id="resetDay">Reset daily progress</button>
+        </div>
+      </div>
+    </section>
+
+    <script src="app.js"></script>
+  </body>
+</html>
