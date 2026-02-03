@@ -16,6 +16,7 @@ const listFilter = document.getElementById("listFilter");
 const sortSelect = document.getElementById("sortSelect");
 const listSelect = document.getElementById("listSelect");
 const addListBtn = document.getElementById("addListBtn");
+const refreshAppBtn = document.getElementById("refreshApp");
 const undoToast = document.getElementById("undoToast");
 const undoText = document.getElementById("undoText");
 const undoBtn = document.getElementById("undoBtn");
@@ -768,6 +769,18 @@ const setupEventHandlers = () => {
     });
     await persistAndSync();
     renderGoals();
+  });
+
+  refreshAppBtn.addEventListener("click", async () => {
+    if (!("serviceWorker" in navigator)) {
+      window.location.reload();
+      return;
+    }
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map((reg) => reg.unregister()));
+    const keys = await caches.keys();
+    await Promise.all(keys.map((key) => caches.delete(key)));
+    window.location.reload(true);
   });
 
   undoBtn.addEventListener("click", () => {
