@@ -383,6 +383,14 @@ h1 {
   font-weight: 600;
 }
 
+.ios .danger-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #c4452f;
+  font-weight: 700;
+}
+
 button {
   border: none;
   font-family: inherit;

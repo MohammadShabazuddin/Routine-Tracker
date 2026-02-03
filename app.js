@@ -43,6 +43,15 @@ const state = {
 let undoAction = null;
 let undoTimer = null;
 
+const applyPlatformClass = () => {
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isIOS) {
+    document.body.classList.add("ios");
+  }
+};
+
 const defaultLists = [
   { id: "list-personal", name: "Personal", color: "#1f3a2b" },
   { id: "list-work", name: "Work", color: "#f08c4b" },
@@ -833,6 +842,7 @@ const resetDailyProgressIfNeeded = () => {
 };
 
 loadState();
+applyPlatformClass();
 ensureDefaultLists();
 resetDailyProgressIfNeeded();
 hydrateSettings();
