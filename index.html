@@ -6,7 +6,7 @@
     <title>RoutineFlow</title>
     <meta
       name="description"
-      content="Daily routine tracking with friendly reminders and progress goals."
+      content="Daily routine tracking with friendly reminders, priorities, and progress goals."
     />
     <link rel="stylesheet" href="styles.css" />
     <meta name="theme-color" content="#1f3a2b" />
@@ -41,14 +41,14 @@
     <main class="app-shell">
       <section class="hero">
         <div>
-          <h2>Make every routine feel effortless.</h2>
+          <h2>Everything you love from Reminders, built for daily routines.</h2>
           <p>
-            Friendly reminders, smart repeats, and visual progress bars for goals like
-            daily water intake.
+            Lists, priorities, tags, repeat schedules, and progress goals — in a clean,
+            friendly interface.
           </p>
         </div>
         <div class="hero-actions">
-          <button class="primary" id="addTaskBtn">Add task</button>
+          <button class="primary" id="addTaskBtn">Add reminder</button>
           <button class="outline" id="addGoalBtn">Add progress goal</button>
           <button class="ghost hidden" id="installBtn">Install app</button>
         </div>
@@ -57,8 +57,31 @@
       <section class="grid">
         <div class="panel">
           <div class="panel-header">
-            <h3>Today</h3>
+            <h3>Reminders</h3>
             <div class="pill" id="todayCount">0 tasks</div>
+          </div>
+          <div class="smart-tabs" id="smartTabs">
+            <button class="tab active" data-filter="today">Today</button>
+            <button class="tab" data-filter="scheduled">Scheduled</button>
+            <button class="tab" data-filter="all">All</button>
+            <button class="tab" data-filter="flagged">Flagged</button>
+            <button class="tab" data-filter="completed">Completed</button>
+          </div>
+          <div class="toolbar">
+            <input
+              type="search"
+              id="searchInput"
+              placeholder="Search reminders"
+              aria-label="Search reminders"
+            />
+            <select id="listFilter">
+              <option value="all">All lists</option>
+            </select>
+            <select id="sortSelect">
+              <option value="due">Sort: Due date</option>
+              <option value="priority">Sort: Priority</option>
+              <option value="title">Sort: Title</option>
+            </select>
           </div>
           <div class="task-list" id="taskList"></div>
         </div>
@@ -88,27 +111,43 @@
       </section>
     </main>
 
+    <div class="toast hidden" id="undoToast">
+      <span id="undoText">Completed</span>
+      <button class="ghost" id="undoBtn">Undo</button>
+    </div>
+
     <section class="sheet" id="taskSheet" aria-hidden="true">
       <div class="sheet-card">
         <div class="sheet-header">
-          <h3>New routine</h3>
+          <h3>New reminder</h3>
           <button class="ghost" data-close="taskSheet">Close</button>
         </div>
         <form id="taskForm">
           <label>
-            Task name
+            Title
             <input type="text" name="title" placeholder="Morning walk" required />
           </label>
           <label>
-            Time
-            <input type="time" name="time" required />
+            List
+            <select name="listId" id="listSelect"></select>
           </label>
+          <div class="field-grid">
+            <label>
+              Due date
+              <input type="date" name="dueDate" />
+            </label>
+            <label>
+              Time
+              <input type="time" name="time" />
+            </label>
+          </div>
           <label>
             Repeat
             <select name="repeat">
+              <option value="none">Never</option>
               <option value="daily">Daily</option>
-              <option value="weekdays">Weekdays</option>
-              <option value="weekends">Weekends</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
               <option value="custom">Custom days</option>
             </select>
           </label>
@@ -121,21 +160,52 @@
             <button type="button" class="chip" data-day="Sat">Sat</button>
             <button type="button" class="chip" data-day="Sun">Sun</button>
           </div>
+          <label>
+            Priority
+            <select name="priority">
+              <option value="0">None</option>
+              <option value="1">Low</option>
+              <option value="2">Medium</option>
+              <option value="3">High</option>
+            </select>
+          </label>
+          <label>
+            Tags (comma separated)
+            <input type="text" name="tags" placeholder="health, morning" />
+          </label>
+          <label>
+            Link (optional)
+            <input type="url" name="link" placeholder="https://example.com" />
+          </label>
+          <label>
+            Subtasks (one per line)
+            <textarea name="subtasks" rows="3" placeholder="Stretch\nDrink water"></textarea>
+          </label>
           <div class="toggle-row">
             <label class="toggle">
               <input type="checkbox" name="alarm" checked />
               <span class="slider"></span>
             </label>
             <div>
-              <p class="toggle-title">Alarm</p>
-              <p class="toggle-sub">Show reminder notifications when open.</p>
+              <p class="toggle-title">Reminder</p>
+              <p class="toggle-sub">Send notification reminders.</p>
+            </div>
+          </div>
+          <div class="toggle-row">
+            <label class="toggle">
+              <input type="checkbox" name="flagged" />
+              <span class="slider"></span>
+            </label>
+            <div>
+              <p class="toggle-title">Flag</p>
+              <p class="toggle-sub">Mark as important.</p>
             </div>
           </div>
           <label>
             Notes
             <textarea name="notes" rows="3" placeholder="Short motivational note"></textarea>
           </label>
-          <button class="primary" type="submit">Save routine</button>
+          <button class="primary" type="submit">Save reminder</button>
         </form>
       </div>
     </section>
@@ -168,6 +238,26 @@
       </div>
     </section>
 
+    <section class="sheet" id="listSheet" aria-hidden="true">
+      <div class="sheet-card">
+        <div class="sheet-header">
+          <h3>New list</h3>
+          <button class="ghost" data-close="listSheet">Close</button>
+        </div>
+        <form id="listForm">
+          <label>
+            List name
+            <input type="text" name="name" placeholder="Personal" required />
+          </label>
+          <label>
+            Color
+            <input type="color" name="color" value="#1f3a2b" />
+          </label>
+          <button class="primary" type="submit">Save list</button>
+        </form>
+      </div>
+    </section>
+
     <section class="sheet" id="settingsSheet" aria-hidden="true">
       <div class="sheet-card">
         <div class="sheet-header">
@@ -185,6 +275,7 @@
               <p class="toggle-sub">Best effort background notifications on Android.</p>
             </div>
           </div>
+          <button class="outline" id="addListBtn">Create new list</button>
           <button class="outline" id="resetDay">Reset daily progress</button>
           <a class="ghost" href="help.html">Notification help</a>
         </div>

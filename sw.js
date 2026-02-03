@@ -1,4 +1,4 @@
-const CACHE_NAME = "routineflow-v1";
+const CACHE_NAME = "routineflow-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -101,21 +101,65 @@ const writeSchedule = async (data) => {
   });
 };
 
+const weekMap = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const getNextDueDate = (task, fromDate = new Date()) => {
+  if (task.snoozeUntil) return new Date(task.snoozeUntil);
+  const hasDate = Boolean(task.dueDate);
+  const hasTime = Boolean(task.time);
+  if (!hasDate && !hasTime) return null;
+
+  const base = new Date(fromDate);
+  const target = hasDate ? new Date(task.dueDate) : new Date(fromDate);
+
+  if (hasTime) {
+    const [hours, minutes] = task.time.split(":").map(Number);
+    target.setHours(hours, minutes, 0, 0);
+  } else {
+    target.setHours(9, 0, 0, 0);
+  }
+
+  if (!hasDate) {
+    if (target < base) target.setDate(target.getDate() + 1);
+    return target;
+  }
+
+  if (task.repeat === "none") return target;
+
+  const repeatDays = task.repeatDays || [];
+  let next = new Date(target);
+  const maxDays = 370;
+  for (let i = 0; i < maxDays; i += 1) {
+    if (next >= base) {
+      if (task.repeat === "daily") return next;
+      if (task.repeat === "weekly") return next;
+      if (task.repeat === "monthly") return next;
+      if (task.repeat === "custom") {
+        const label = weekMap[next.getDay()];
+        if (repeatDays.includes(label)) return next;
+      }
+    }
+
+    if (task.repeat === "daily") next.setDate(next.getDate() + 1);
+    if (task.repeat === "weekly") next.setDate(next.getDate() + 7);
+    if (task.repeat === "monthly") next.setMonth(next.getMonth() + 1);
+    if (task.repeat === "custom") next.setDate(next.getDate() + 1);
+  }
+
+  return null;
+};
+
 const shouldNotifyTask = (task, now, lastNotified) => {
   if (!task.alarm || task.done) return false;
-  const [hours, minutes] = task.time.split(":").map(Number);
-  const scheduled = new Date(now);
-  scheduled.setHours(hours, minutes, 0, 0);
-
-  const day = now.toLocaleDateString("en-US", { weekday: "short" });
-  if (task.repeat === "weekdays" && (day === "Sat" || day === "Sun")) return false;
-  if (task.repeat === "weekends" && day !== "Sat" && day !== "Sun") return false;
-  if (task.repeat === "custom" && task.days && !task.days.includes(day)) return false;
+  const due = getNextDueDate(task, now);
+  if (!due) return false;
 
   const windowMs = 10 * 60 * 1000;
-  const isDue = Math.abs(now - scheduled) <= windowMs;
+  const isDue = Math.abs(now - due) <= windowMs;
   if (!isDue) return false;
-  return lastNotified !== now.toDateString();
+
+  if (!lastNotified) return true;
+  return now.getTime() - lastNotified > windowMs;
 };
 
 const shouldNotifyGoal = (goal, now, lastNotified) => {
@@ -137,11 +181,11 @@ const handleReminderCheck = async () => {
     const last = lastNotified.tasks[task.id];
     if (shouldNotifyTask(task, now, last)) {
       await self.registration.showNotification(task.title, {
-        body: task.notes || `Reminder scheduled for ${task.time}`,
+        body: task.notes || "Reminder is due.",
         icon: "icons/icon-192.png",
         badge: "icons/icon-192.png",
       });
-      lastNotified.tasks[task.id] = now.toDateString();
+      lastNotified.tasks[task.id] = now.getTime();
       updated = true;
     }
   }
