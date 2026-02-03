@@ -2,9 +2,9 @@
   "version": 2,
   "public": true,
   "cleanUrls": true,
-  "rewrites": [
-    { "source": "/help", "destination": "/help.html" },
-    { "source": "/help.html", "destination": "/help.html" },
-    { "source": "/(.*)", "destination": "/index.html" }
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/help", "dest": "/help.html" },
+    { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
