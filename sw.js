@@ -102,7 +102,7 @@ const writeSchedule = async (data) => {
 };
 
 const shouldNotifyTask = (task, now, lastNotified) => {
-  if (!task.alarm) return false;
+  if (!task.alarm || task.done) return false;
   const [hours, minutes] = task.time.split(":").map(Number);
   const scheduled = new Date(now);
   scheduled.setHours(hours, minutes, 0, 0);

@@ -60,7 +60,18 @@ const openDb = () =>
     request.onerror = () => reject(request.error);
   });
 
+const readScheduleFromDb = async () => {
+  const db = await openDb();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(DB_STORE, "readonly");
+    const request = tx.objectStore(DB_STORE).get("data");
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
 const writeScheduleToDb = async () => {
+  const existing = await readScheduleFromDb();
   const db = await openDb();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(DB_STORE, "readwrite");
@@ -69,6 +80,7 @@ const writeScheduleToDb = async () => {
         tasks: state.tasks,
         goals: state.goals,
         settings: state.settings,
+        lastNotified: existing?.lastNotified || { tasks: {}, goals: {} },
         updatedAt: Date.now(),
       },
       "data"
@@ -202,7 +214,7 @@ const scheduleReminders = () => {
   if (!state.settings.notifications) return;
   const now = new Date();
   state.tasks.forEach((task) => {
-    if (!task.alarm) return;
+    if (!task.alarm || task.done) return;
     const [hours, minutes] = task.time.split(":").map(Number);
     const reminder = new Date(now);
     reminder.setHours(hours, minutes, 0, 0);
@@ -216,6 +228,7 @@ const scheduleReminders = () => {
   });
 
   state.goals.forEach((goal) => {
+    if (goal.progress >= goal.target) return;
     const intervalMs = goal.interval * 60 * 1000;
     setInterval(() => {
       if (!state.settings.notifications) return;
