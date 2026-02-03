@@ -233,6 +233,19 @@ h1 {
   height: 18px;
 }
 
+.icon-btn span {
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+.icon-btn.show-label {
+  padding: 0 12px;
+  width: auto;
+  height: 36px;
+  gap: 6px;
+}
+
 .task-card.complete {
   opacity: 0.6;
 }
