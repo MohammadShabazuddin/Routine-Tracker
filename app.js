@@ -7,6 +7,8 @@ const todayCount = document.getElementById("todayCount");
 const goalCount = document.getElementById("goalCount");
 const notificationsToggle = document.getElementById("notificationsToggle");
 const installBtn = document.getElementById("installBtn");
+const installBanner = document.getElementById("installBanner");
+const installBannerBtn = document.getElementById("installBannerBtn");
 
 const STORAGE_KEY = "routineflow-data-v1";
 const DB_NAME = "routineflow-db";
@@ -362,18 +364,24 @@ const setupInstallPrompt = () => {
     event.preventDefault();
     deferredPrompt = event;
     installBtn.classList.remove("hidden");
+    installBanner.classList.remove("hidden");
   });
 
-  installBtn.addEventListener("click", async () => {
+  const handleInstall = async () => {
     if (!deferredPrompt) return;
     deferredPrompt.prompt();
     await deferredPrompt.userChoice;
     deferredPrompt = null;
     installBtn.classList.add("hidden");
-  });
+    installBanner.classList.add("hidden");
+  };
+
+  installBtn.addEventListener("click", handleInstall);
+  installBannerBtn.addEventListener("click", handleInstall);
 
   window.addEventListener("appinstalled", () => {
     installBtn.classList.add("hidden");
+    installBanner.classList.add("hidden");
   });
 };
 
