@@ -749,33 +749,35 @@ const setupEventHandlers = () => {
   let swipeTarget = null;
   let swipeStartX = 0;
   let swipeDelta = 0;
+  let swipeActive = false;
 
   const resetSwipe = () => {
     if (!swipeTarget) return;
     swipeTarget.style.transform = "translateX(0px)";
     swipeTarget = null;
     swipeDelta = 0;
+    swipeActive = false;
   };
 
-  goalList.addEventListener("touchstart", (event) => {
-    if (!(event.target instanceof Element)) return;
-    const target = event.target.closest(".goal-swipe");
+  goalList.addEventListener("pointerdown", (event) => {
+    const target = event.target instanceof Element ? event.target.closest(".goal-swipe") : null;
     if (!target) return;
     swipeTarget = target.querySelector(".goal-card");
-    swipeStartX = event.touches[0].clientX;
+    swipeStartX = event.clientX;
     swipeDelta = 0;
+    swipeActive = true;
+    swipeTarget?.setPointerCapture?.(event.pointerId);
   });
 
-  goalList.addEventListener("touchmove", (event) => {
-    if (!swipeTarget) return;
-    const currentX = event.touches[0].clientX;
-    swipeDelta = Math.min(0, currentX - swipeStartX);
-    swipeTarget.style.transform = `translateX(${Math.max(swipeDelta, -120)}px)`;
+  goalList.addEventListener("pointermove", (event) => {
+    if (!swipeActive || !swipeTarget) return;
+    swipeDelta = Math.min(0, event.clientX - swipeStartX);
+    swipeTarget.style.transform = `translateX(${Math.max(swipeDelta, -140)}px)`;
   });
 
-  goalList.addEventListener("touchend", async () => {
-    if (!swipeTarget) return;
-    if (Math.abs(swipeDelta) > 80) {
+  goalList.addEventListener("pointerup", async () => {
+    if (!swipeActive || !swipeTarget) return;
+    if (Math.abs(swipeDelta) > 90) {
       const wrapper = swipeTarget.parentElement;
       const goalId = wrapper?.dataset.id;
       state.goals = state.goals.filter((item) => item.id !== goalId);
@@ -785,6 +787,8 @@ const setupEventHandlers = () => {
       resetSwipe();
     }
   });
+
+  goalList.addEventListener("pointercancel", resetSwipe);
 
   notificationsToggle.addEventListener("change", async (event) => {
     const enabled = event.target.checked;

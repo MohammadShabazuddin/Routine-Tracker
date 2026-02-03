@@ -217,6 +217,7 @@ h1 {
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-md);
+  touch-action: pan-y;
 }
 
 .goal-swipe .goal-card {
@@ -224,6 +225,7 @@ h1 {
   position: relative;
   z-index: 2;
   transition: transform 0.2s ease;
+  touch-action: pan-y;
 }
 
 .goal-delete {
