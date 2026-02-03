@@ -416,11 +416,16 @@ const renderGoals = () => {
         <button class="outline" data-action="minus" data-id="${goal.id}">-1</button>
         <button class="primary" data-action="plus" data-id="${goal.id}">+1</button>
         <button class="ghost" data-action="reset" data-id="${goal.id}">Reset</button>
-        <button class="ghost" data-action="delete" data-id="${goal.id}">Delete</button>
       </div>
     `;
 
-    goalList.appendChild(card);
+    const swipe = document.createElement("div");
+    swipe.className = "goal-swipe";
+    swipe.dataset.id = goal.id;
+    swipe.innerHTML = `<div class="goal-delete">Delete</div>`;
+    swipe.appendChild(card);
+
+    goalList.appendChild(swipe);
   });
 };
 
@@ -737,13 +742,48 @@ const setupEventHandlers = () => {
     if (target.dataset.action === "reset") {
       goal.progress = 0;
     }
-    if (target.dataset.action === "delete") {
-      const confirmed = confirm("Delete this goal?");
-      if (!confirmed) return;
-      state.goals = state.goals.filter((item) => item.id !== goal.id);
-    }
     await persistAndSync();
     renderGoals();
+  });
+
+  let swipeTarget = null;
+  let swipeStartX = 0;
+  let swipeDelta = 0;
+
+  const resetSwipe = () => {
+    if (!swipeTarget) return;
+    swipeTarget.style.transform = "translateX(0px)";
+    swipeTarget = null;
+    swipeDelta = 0;
+  };
+
+  goalList.addEventListener("touchstart", (event) => {
+    if (!(event.target instanceof Element)) return;
+    const target = event.target.closest(".goal-swipe");
+    if (!target) return;
+    swipeTarget = target.querySelector(".goal-card");
+    swipeStartX = event.touches[0].clientX;
+    swipeDelta = 0;
+  });
+
+  goalList.addEventListener("touchmove", (event) => {
+    if (!swipeTarget) return;
+    const currentX = event.touches[0].clientX;
+    swipeDelta = Math.min(0, currentX - swipeStartX);
+    swipeTarget.style.transform = `translateX(${Math.max(swipeDelta, -120)}px)`;
+  });
+
+  goalList.addEventListener("touchend", async () => {
+    if (!swipeTarget) return;
+    if (Math.abs(swipeDelta) > 80) {
+      const wrapper = swipeTarget.parentElement;
+      const goalId = wrapper?.dataset.id;
+      state.goals = state.goals.filter((item) => item.id !== goalId);
+      await persistAndSync();
+      renderGoals();
+    } else {
+      resetSwipe();
+    }
   });
 
   notificationsToggle.addEventListener("change", async (event) => {

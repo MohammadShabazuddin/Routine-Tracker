@@ -213,6 +213,32 @@ h1 {
   gap: 10px;
 }
 
+.goal-swipe {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.goal-swipe .goal-card {
+  background: var(--panel);
+  position: relative;
+  z-index: 2;
+  transition: transform 0.2s ease;
+}
+
+.goal-delete {
+  position: absolute;
+  inset: 0;
+  background: #c4452f;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 20px;
+  color: #fff;
+  font-weight: 600;
+  z-index: 1;
+}
+
 .task-card.complete {
   opacity: 0.6;
 }
