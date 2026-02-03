@@ -2,6 +2,7 @@ const CACHE_NAME = "routineflow-v1";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./help.html",
   "./styles.css",
   "./app.js",
   "./manifest.webmanifest",

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>RoutineFlow Help</title>
+    <meta
+      name="description"
+      content="Troubleshooting reminders and notifications for RoutineFlow."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="theme-color" content="#1f3a2b" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <div class="logo">RF</div>
+        <div>
+          <p class="eyebrow">Help center</p>
+          <h1>RoutineFlow</h1>
+        </div>
+      </div>
+      <a class="ghost" href="index.html">Back to app</a>
+    </header>
+
+    <main class="app-shell">
+      <section class="panel landing">
+        <div class="panel-header">
+          <h3>Reminders Not Showing?</h3>
+          <div class="pill">Quick fix</div>
+        </div>
+        <ol class="steps">
+          <li>Open the app in Chrome on Android.</li>
+          <li>Tap Install and open the app from the Home Screen.</li>
+          <li>Go to Settings and enable reminders.</li>
+          <li>When prompted, allow notifications.</li>
+        </ol>
+      </section>
+
+      <section class="panel landing">
+        <div class="panel-header">
+          <h3>Device Settings</h3>
+          <div class="pill">Android</div>
+        </div>
+        <ul class="steps">
+          <li>Settings → Apps → Chrome → Notifications → Allow</li>
+          <li>Settings → Apps → RoutineFlow → Notifications → Allow</li>
+          <li>Disable battery optimization for Chrome or RoutineFlow</li>
+        </ul>
+      </section>
+
+      <section class="panel landing">
+        <div class="panel-header">
+          <h3>How It Works</h3>
+          <div class="pill">Good to know</div>
+        </div>
+        <p class="task-sub">
+          Reminders always work when the app is open. Background reminders are
+          best effort on Android PWAs and can be throttled by battery saver.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
