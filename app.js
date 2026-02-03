@@ -416,16 +416,19 @@ const renderGoals = () => {
         <button class="outline" data-action="minus" data-id="${goal.id}">-1</button>
         <button class="primary" data-action="plus" data-id="${goal.id}">+1</button>
         <button class="ghost" data-action="reset" data-id="${goal.id}">Reset</button>
+        <button class="icon-btn danger" data-action="delete" data-id="${goal.id}" aria-label="Delete goal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18" />
+            <path d="M8 6V4h8v2" />
+            <path d="M19 6l-1 14H6L5 6" />
+            <path d="M10 11v6" />
+            <path d="M14 11v6" />
+          </svg>
+        </button>
       </div>
     `;
 
-    const swipe = document.createElement("div");
-    swipe.className = "goal-swipe";
-    swipe.dataset.id = goal.id;
-    swipe.innerHTML = `<div class="goal-delete">Delete</div>`;
-    swipe.appendChild(card);
-
-    goalList.appendChild(swipe);
+    goalList.appendChild(card);
   });
 };
 
@@ -742,53 +745,14 @@ const setupEventHandlers = () => {
     if (target.dataset.action === "reset") {
       goal.progress = 0;
     }
+    if (target.dataset.action === "delete") {
+      const confirmed = confirm("Delete this goal?");
+      if (!confirmed) return;
+      state.goals = state.goals.filter((item) => item.id !== goal.id);
+    }
     await persistAndSync();
     renderGoals();
   });
-
-  let swipeTarget = null;
-  let swipeStartX = 0;
-  let swipeDelta = 0;
-  let swipeActive = false;
-
-  const resetSwipe = () => {
-    if (!swipeTarget) return;
-    swipeTarget.style.transform = "translateX(0px)";
-    swipeTarget = null;
-    swipeDelta = 0;
-    swipeActive = false;
-  };
-
-  goalList.addEventListener("pointerdown", (event) => {
-    const target = event.target instanceof Element ? event.target.closest(".goal-swipe") : null;
-    if (!target) return;
-    swipeTarget = target.querySelector(".goal-card");
-    swipeStartX = event.clientX;
-    swipeDelta = 0;
-    swipeActive = true;
-    swipeTarget?.setPointerCapture?.(event.pointerId);
-  });
-
-  goalList.addEventListener("pointermove", (event) => {
-    if (!swipeActive || !swipeTarget) return;
-    swipeDelta = Math.min(0, event.clientX - swipeStartX);
-    swipeTarget.style.transform = `translateX(${Math.max(swipeDelta, -140)}px)`;
-  });
-
-  goalList.addEventListener("pointerup", async () => {
-    if (!swipeActive || !swipeTarget) return;
-    if (Math.abs(swipeDelta) > 90) {
-      const wrapper = swipeTarget.parentElement;
-      const goalId = wrapper?.dataset.id;
-      state.goals = state.goals.filter((item) => item.id !== goalId);
-      await persistAndSync();
-      renderGoals();
-    } else {
-      resetSwipe();
-    }
-  });
-
-  goalList.addEventListener("pointercancel", resetSwipe);
 
   notificationsToggle.addEventListener("change", async (event) => {
     const enabled = event.target.checked;

@@ -213,32 +213,24 @@ h1 {
   gap: 10px;
 }
 
-.goal-swipe {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-md);
-  touch-action: pan-y;
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #f5efe4;
+  color: #5a4a3b;
 }
 
-.goal-swipe .goal-card {
-  background: var(--panel);
-  position: relative;
-  z-index: 2;
-  transition: transform 0.2s ease;
-  touch-action: pan-y;
+.icon-btn.danger {
+  background: #f8e5e1;
+  color: #c4452f;
 }
 
-.goal-delete {
-  position: absolute;
-  inset: 0;
-  background: #c4452f;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 20px;
-  color: #fff;
-  font-weight: 600;
-  z-index: 1;
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
 }
 
 .task-card.complete {
