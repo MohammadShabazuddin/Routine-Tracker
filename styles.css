@@ -399,6 +399,8 @@ button {
   border-radius: var(--radius-lg);
   padding: 22px;
   box-shadow: var(--shadow);
+  max-height: min(85vh, 720px);
+  overflow-y: auto;
 }
 
 .sheet-header {
