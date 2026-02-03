@@ -390,6 +390,9 @@ const renderTasks = () => {
             ${task.flagged ? "Unflag" : "Flag"}
           </button>
           <button class="ghost" data-action="snooze" data-id="${task.id}">Snooze 1h</button>
+          <button class="danger-btn" data-action="delete" data-id="${task.id}">
+            Delete
+          </button>
         </div>
         <span class="task-sub">Created ${new Date(task.createdAt).toLocaleDateString()}</span>
       </div>
@@ -717,6 +720,14 @@ const setupEventHandlers = () => {
       const snooze = new Date();
       snooze.setHours(snooze.getHours() + 1);
       task.snoozeUntil = snooze.toISOString();
+      await persistAndSync();
+      renderTasks();
+    }
+
+    if (target.dataset.action === "delete") {
+      const confirmed = confirm("Delete this reminder?");
+      if (!confirmed) return;
+      state.tasks = state.tasks.filter((item) => item.id !== task.id);
       await persistAndSync();
       renderTasks();
     }
