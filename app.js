@@ -679,8 +679,8 @@ const setupEventHandlers = () => {
   });
 
   taskList.addEventListener("click", async (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
+    const target = event.target instanceof Element ? event.target.closest("[data-action]") : null;
+    if (!target) return;
     const id = target.dataset.id;
     const task = state.tasks.find((item) => item.id === id);
     if (!task) return;
@@ -725,10 +725,11 @@ const setupEventHandlers = () => {
   taskList.addEventListener("change", async (event) => {
     const target = event.target;
     if (!(target instanceof HTMLInputElement)) return;
-    if (target.dataset.action === "subtask") {
-      const task = state.tasks.find((item) => item.id === target.dataset.id);
+    const actionEl = target.closest("[data-action]");
+    if (actionEl?.dataset.action === "subtask") {
+      const task = state.tasks.find((item) => item.id === actionEl.dataset.id);
       if (!task) return;
-      const sub = task.subtasks.find((item) => item.id === target.dataset.subid);
+      const sub = task.subtasks.find((item) => item.id === actionEl.dataset.subid);
       if (!sub) return;
       sub.done = target.checked;
       await persistAndSync();
@@ -736,8 +737,8 @@ const setupEventHandlers = () => {
   });
 
   goalList.addEventListener("click", async (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
+    const target = event.target instanceof Element ? event.target.closest("[data-action]") : null;
+    if (!target) return;
     const goal = state.goals.find((item) => item.id === target.dataset.id);
     if (!goal) return;
     if (target.dataset.action === "plus") {
