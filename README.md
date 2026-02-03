@@ -18,6 +18,14 @@ A mobile-first PWA for daily routine tracking, smart repeats, and goal progress 
 2. Ensure HTTPS is enabled (required for service workers and installability).
 3. Visit the hosted URL in Chrome on Android and tap `Install app`.
 
+## One-click deploy (Vercel)
+1. In your Vercel dashboard, click **New Project**.
+2. Import the `Routine-Tracker` GitHub repo.
+3. Framework preset: **Other** (static).
+4. Build command: **None**.
+5. Output directory: **/** (project root).
+6. Deploy.
+
 ## Background reminders (Android)
 RoutineFlow uses a service worker + background sync to deliver reminder notifications on Android.
 This works best on Chrome Android and may be throttled by the OS when the app is idle.
