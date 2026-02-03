@@ -416,6 +416,7 @@ const renderGoals = () => {
         <button class="outline" data-action="minus" data-id="${goal.id}">-1</button>
         <button class="primary" data-action="plus" data-id="${goal.id}">+1</button>
         <button class="ghost" data-action="reset" data-id="${goal.id}">Reset</button>
+        <button class="ghost" data-action="delete" data-id="${goal.id}">Delete</button>
       </div>
     `;
 
@@ -735,6 +736,11 @@ const setupEventHandlers = () => {
     }
     if (target.dataset.action === "reset") {
       goal.progress = 0;
+    }
+    if (target.dataset.action === "delete") {
+      const confirmed = confirm("Delete this goal?");
+      if (!confirmed) return;
+      state.goals = state.goals.filter((item) => item.id !== goal.id);
     }
     await persistAndSync();
     renderGoals();
